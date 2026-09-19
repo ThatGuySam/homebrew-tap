@@ -97,7 +97,7 @@ class UpdateTests(unittest.TestCase):
         text = updater.CASK.read_text()
         self.assertEqual(len(updater.VERSION_LINE.findall(text)), 1)
         self.assertEqual(len(updater.SHA_LINE.findall(text)), 1)
-        for required in ('depends_on arch: :arm64', 'depends_on macos: ">= :sequoia"',
+        for required in ('depends_on arch: :arm64', 'depends_on macos: :sequoia',
                          'app "Try Omarchy.app"', 'strategy :github_latest'):
             self.assertIn(required, text)
         for forbidden in ("sha256 :no_check", "auto_updates true", "uninstall quit:", "signal:"):
