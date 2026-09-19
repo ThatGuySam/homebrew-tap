@@ -1,0 +1,36 @@
+name: Validate tap
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Unit tests and syntax checks
+        run: |
+          python3 -m unittest discover -s tests -v
+          ruby -c Casks/thatguysam-try-omarchy.rb
+          for script in scripts/*.sh; do bash -n "$script"; done
+  macos-package:
+    needs: tests
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Verify packaging on Apple Silicon (no VM boot)
+        env:
+          HOMEBREW_GITHUB_API_TOKEN: ${{ github.token }}
+        run: bash scripts/verify-macos.sh
